@@ -1,1 +1,2 @@
-# Hackithon2024DosCreditos
+Dos Créditos
+https://hackithon.ujep.cz/
