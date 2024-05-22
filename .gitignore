@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Dependency directories
+node_modules/
+
+# Visual Studio
+.vs/
+
 # Distribution / packaging
 .Python
 build/
