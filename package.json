@@ -3,5 +3,14 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3"
-  }
+  },
+  "name": "hackithon2024doscreditos",
+  "version": "1.0.0",
+  "description": "Řešení týmu Dos Créditos v rámci [Hackithonu](https://hackithon.ujep.cz/) 2024",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
 }
