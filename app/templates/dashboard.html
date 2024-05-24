@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Data</title>
+    <link rel="stylesheet" href="../static/css/output.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function fetchData() {
+                $.ajax({
+                    url: '/get_data',
+                    type: 'GET',
+                    success: function (response) {
+                        $('#mqtt_table tbody').empty();
+                        response.mqtt_data.forEach(function (data) {
+                            $('#mqtt_table tbody').append('<tr><td>' + data.topic + '</td><td>' + data.size + '</td><td>' + data.timestamp + '</td></tr>');
+                        });
+                    }
+                });
+            }
+
+            fetchData();
+            setInterval(fetchData, 1000); // Fetch data every second
+        });
+    </script>
+</head>
+
+<body>
+    <h1>MQTT Data</h1>
+    <table border="1" id="mqtt_table">
+        <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Size</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+</body>
+
+</html>

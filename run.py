@@ -5,4 +5,4 @@ import threading
 if __name__ == "__main__":
     mqtt_thread = threading.Thread(target=run_mqtt_client)
     mqtt_thread.start()
-    app.run(debug=True)
+    app.run()
