@@ -40,7 +40,7 @@ def on_message(client, userdata, msg):
         print("Failed to decode payload with UTF-8")
 
 
-def mqtt_client():
+def run_mqtt_client():
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     mqttc.tls_set(tls_version=ssl.PROTOCOL_TLSv1_2)
     mqttc.username_pw_set(MQTT_USER, MQTT_PASSWORD)
