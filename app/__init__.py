@@ -1,7 +1,7 @@
 from flask import Flask
-from app import mqtt_client
+from dash import Dash
 
-app = Flask(__name__)
-
+server = Flask(__name__)
+app = Dash(__name__, server=server)
 
 from app import routes
