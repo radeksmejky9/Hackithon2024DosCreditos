@@ -176,7 +176,8 @@ def update_top_transfers_graph(n):
             {
                 "labels": list(top_transfers.keys()),
                 "values": list(top_transfers.values()),
-                "type": "pie"
+                "type": "pie",
+                "domain": {"x": [0.1, 1], "y": [0, 1]}
             }
         ],
         "layout": layout,
