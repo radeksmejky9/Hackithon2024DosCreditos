@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
 import json
 import ssl
+from app import redisClient
 
 load_dotenv()
 MQTT_BROKER = os.getenv("MQTT_BROKER")
@@ -21,6 +22,7 @@ TOPICS = {
 }
 
 mqtt_data = {value: [] for value in TOPICS.keys()}
+message_count = 0
 
 
 def on_connect(client, userdata, flags, reason_code, properties):
@@ -28,6 +30,8 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 
 def on_message(client, userdata, msg):
+    global mqtt_data, message_count
+
     json_size = get_msg_size(msg)
     if json_size == -1:
         return
@@ -37,7 +41,8 @@ def on_message(client, userdata, msg):
     if topic in TOPICS.keys():
         mqtt_data[topic].append(
             {
-                "topic": msg.topic,
+                "topic": topic,
+                "topic_long": msg.topic,
                 "topic_readable": TOPICS[topic],
                 "size": json_size,
                 "timestamp": datetime.datetime.now(),
@@ -46,15 +51,22 @@ def on_message(client, userdata, msg):
     else:
         mqtt_data["unknown"].append(
             {
-                "topic": msg.topic,
+                "topic": "unknown",
+                "topic_long": msg.topic,
                 "topic_readable": TOPICS["unknown"],
                 "size": json_size,
                 "timestamp": datetime.datetime.now(),
             }
         )
+    message_count += 1
+    if message_count > 5:
+        redisClient.store_messages(mqtt_data)
+        message_count = 0
+        mqtt_data = {value: [] for value in TOPICS.keys()}
 
 
 def run_mqtt_client():
+    message_count = 0
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     mqttc.tls_set(tls_version=ssl.PROTOCOL_TLSv1_2)
     mqttc.username_pw_set(MQTT_USER, MQTT_PASSWORD)
