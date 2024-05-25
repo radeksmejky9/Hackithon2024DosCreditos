@@ -27,6 +27,7 @@ layout = html.Div(
         ),
         dcc.Graph(id="top_size_graph"),
         dcc.Graph(id="top_transfers_graph"),
+        dcc.Graph(id="top_transfers_graph_pie"),
         dcc.Interval(
             id="interval-component", interval=1000, n_intervals=0  # in milliseconds
         ),
@@ -143,12 +144,41 @@ def update_top_transfers_graph(n):
             {
                 "x": list(top_transfers.keys()),
                 "y": list(top_transfers.values()),
-                "type": "bar",
+                "type": "bar"
             }
         ],
         "layout": layout,
     }
     return top_transfers_figure
+
+
+@app.callback(
+    Output("top_transfers_graph_pie", "figure"),
+    [Input("interval-component", "n_intervals")],
+)
+def update_top_size_graph(n):
+    layout = { "title": "Top Transfers" }
+    data = get_data(layout=layout)
+    
+    transfer_counts = Counter(
+        [data["topic_readable"] for topic in data.values() for data in topic]
+    )
+    top_transfers = dict(
+        sorted(transfer_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+    )
+    
+    # Creating the pie chart
+    top_transfers_graph_pie = {
+        "data": [
+            {
+                "labels": list(top_transfers.keys()),
+                "values": list(top_transfers.values()),
+                "type": "pie",
+            }
+        ],
+        "layout": layout,
+    }
+    return top_transfers_graph_pie
 
 
 # @app.callback(
