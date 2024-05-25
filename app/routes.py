@@ -158,6 +158,33 @@ def update_top_transfers_graph(n):
 
 
 @app.callback(
+    Output("top_transfers_graph_pie", "figure"),
+    [Input("interval-component", "n_intervals")],
+)
+def update_top_transfers_graph(n):
+    layout = {"title": "Top Transfers"}
+    data = get_data(layout=layout)
+
+    transfer_counts = Counter(
+        [data["topic_readable"] for topic in data.values() for data in topic]
+    )
+    top_transfers = dict(
+        sorted(transfer_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+    )
+    top_transfers_graph_pie = {
+        "data": [
+            {
+                "labels": list(top_transfers.keys()),
+                "values": list(top_transfers.values()),
+                "type": "pie"
+            }
+        ],
+        "layout": layout,
+    }
+    return top_transfers_graph_pie
+
+
+@app.callback(
     Output("req_per_min_graph", "figure"),
     [Input("interval-component", "n_intervals")],
 )
