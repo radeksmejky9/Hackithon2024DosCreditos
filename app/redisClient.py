@@ -1,5 +1,4 @@
 import redis
-from flask import jsonify
 import time
 import datetime
 import json

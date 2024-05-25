@@ -1,13 +1,32 @@
+from collections import Counter
 from app import app, redisClient
-from flask import render_template, make_response
+from flask import render_template
 from app.mqtt_client import TOPICS
 from dash import dcc, html, Input, Output
-import json
 
 layout = html.Div(
     [
         html.H1("MQTT Data flow"),
-        dcc.Graph(id="mqtt_graph"),
+        dcc.Graph(
+            id="mqtt_graph",
+            figure={
+                "data": [
+                    {
+                        "x": [],
+                        "y": [],
+                        "mode": "markers+lines",
+                        "name": "Placeholder",
+                    }
+                ],
+                "layout": {
+                    "title": "MQTT Data",
+                    "xaxis": {"title": "Timestamp"},
+                    "yaxis": {"title": "Size"},
+                },
+            },
+        ),
+        dcc.Graph(id="top_size_graph"),
+        dcc.Graph(id="top_transfers_graph"),
         dcc.Interval(
             id="interval-component", interval=1000, n_intervals=0  # in milliseconds
         ),
@@ -18,6 +37,7 @@ app.layout = layout
 data = []
 
 
+# Callback for updating MQTT data graph
 @app.callback(
     Output("mqtt_graph", "figure"),
     [Input("interval-component", "n_intervals")],
@@ -31,10 +51,7 @@ def update_graph(n):
         "yaxis": {"title": "Size"},
     }
 
-    data = redisClient.get_messages()
-
-    if data == []:
-        return {"data": traces, "layout": layout}
+    data = get_data(traces=traces, layout=layout)
 
     for topic_key in TOPICS.keys():
         traces.append(dict(x=[], y=[], mode="markers+lines", name=topic_key))
@@ -79,6 +96,88 @@ def update_graph(n):
     return {"data": traces, "layout": layout}
 
 
+@app.callback(
+    Output("top_size_graph", "figure"),
+    [Input("interval-component", "n_intervals")],
+)
+def update_top_size_graph(n):
+    layout = {
+        "title": "Top Size Transferred Over Time",
+        "xaxis": {"title": "Topic"},
+        "yaxis": {"title": "Total Size Transferred"},
+    }
+    data = get_data(layout=layout)
+    top_size_topics = sorted(
+        data.keys(),
+        key=lambda x: sum(d["size"] for d in data[x]),
+        reverse=True,
+    )[:5]
+    top_size_values = [
+        sum(data["size"] for data in data[topic]) for topic in top_size_topics
+    ]
+
+    top_size_figure = {
+        "data": [{"x": top_size_topics, "y": top_size_values, "type": "bar"}],
+        "layout": layout,
+    }
+
+    return top_size_figure
+
+
+@app.callback(
+    Output("top_transfers_graph", "figure"),
+    [Input("interval-component", "n_intervals")],
+)
+def update_top_transfers_graph(n):
+    layout = {"title": "Top Transfers"}
+    data = get_data(layout=layout)
+
+    transfer_counts = Counter(
+        [data["topic_readable"] for topic in data.values() for data in topic]
+    )
+    top_transfers = dict(
+        sorted(transfer_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+    )
+    top_transfers_figure = {
+        "data": [
+            {
+                "x": list(top_transfers.keys()),
+                "y": list(top_transfers.values()),
+                "type": "bar",
+            }
+        ],
+        "layout": layout,
+    }
+    return top_transfers_figure
+
+
+# @app.callback(
+#     Output("top_transfers_graph", "figure"),
+#     [Input("interval-component", "n_intervals")],
+# )
+# def total_stability(n):
+#     layout = {"title": "Top Transfers"}
+#     data = get_data()
+
+#     transfer_counts = Counter(
+#         [data["topic_readable"] for topic in data.values() for data in topic]
+#     )
+#     top_transfers = dict(
+#         sorted(transfer_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+#     )
+#     top_transfers_figure = {
+#         "data": [
+#             {
+#                 "x": list(top_transfers.keys()),
+#                 "y": list(top_transfers.values()),
+#                 "type": "bar",
+#             }
+#         ],
+#         "layout": layout,
+#     }
+#     return top_transfers_figure
+
+
 @app.server.route("/")
 def index():
     return "lorem"
@@ -89,11 +188,15 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-@app.server.route("/get_data")
-def get_data():
-    return app.index()
-
-
 @app.server.route("/hello")
 def hello():
     return "Hello, World!"
+
+
+def get_data(traces=[], layout={}):
+    data = redisClient.get_messages()
+
+    if data == []:
+        return {"data": traces, "layout": layout}
+
+    return data
