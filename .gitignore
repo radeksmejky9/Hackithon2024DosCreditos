@@ -11,6 +11,7 @@ node_modules/
 
 # Visual Studio
 .vs/
+.vscode/
 
 # Distribution / packaging
 .Python
