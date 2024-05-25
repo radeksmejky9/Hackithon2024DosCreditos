@@ -59,9 +59,8 @@ def on_message(client, userdata, msg):
             }
         )
     message_count += 1
-    if message_count > 5:
+    if message_count % 5:
         redisClient.store_messages(mqtt_data)
-        message_count = 0
         mqtt_data = {value: [] for value in TOPICS.keys()}
 
 
