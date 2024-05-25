@@ -7,17 +7,21 @@ services:
       - "5000:5000"
     volumes:
       - ./code:/app
-    depends_on:
-      - redis
+
+  mqtt_client:
+    build:
+      dockerfile: Dockerfile_mqtt
+    container_name: mqtt_client
 
   redis:
-    image: redislabs/redismod
+    image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
 
   mongodb:
     image: mongo:latest
+    container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
