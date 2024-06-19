@@ -149,7 +149,7 @@ def update_top_transfers_graph(n):
             {
                 "x": list(top_transfers.keys()),
                 "y": list(top_transfers.values()),
-                "type": "bar"
+                "type": "bar",
             }
         ],
         "layout": layout,
@@ -177,7 +177,7 @@ def update_top_transfers_graph(n):
                 "labels": list(top_transfers.keys()),
                 "values": list(top_transfers.values()),
                 "type": "pie",
-                "domain": {"x": [0.1, 1], "y": [0, 1]}
+                "domain": {"x": [0.1, 1], "y": [0, 1]},
             }
         ],
         "layout": layout,
@@ -200,9 +200,10 @@ def update_req_per_min_graph(n):
     data = get_data(layout=layout)
     current_time = datetime.datetime.now()
     elapsed_time = (current_time - start_time).total_seconds()
-
+    
     if elapsed_time > 0:
         messages_per_minute = len(data) / (elapsed_time / 60)
+    print(len(data))
 
     messages_per_minute_history.append([current_time, messages_per_minute])
 
